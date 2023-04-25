@@ -101,11 +101,11 @@ argss: ";" args {$$=mknode("",$2,NULL);}
 ;
 
 arg : ARG ID ids ":" type  {$$=mknode("",
-				$5,mknode("",
-					mknode($2,NULL,NULL),$3));}
+										$5,
+										mknode($2,$3,NULL));}
 ;
 
-ids : ","ID ids {$$=mknode("",mknode($2,NULL,NULL),$3);}
+ids : ","ID ids {$$=mknode($2,$3,NULL);}
               | {$$=NULL;}
 ;
 
@@ -334,9 +334,13 @@ void Printtree(node* tree)
 		printf("\n %s"," "*spaces);
 	}
 	else if (strcmp(tree->token, "(") == 0){
-		 
-		printf("%s %s ",tree->token,tree->left->left->token);
 
+		node *temp = tree->left 
+		printf("(%s " , temp->left->token);
+		do{
+			printf(temp->right->token)
+			temp = temp->right->left;
+		}while(temp != NULL)
 			
 	}
 	else if(strcmp(tree->token, "CALL FUNC") == 0){
