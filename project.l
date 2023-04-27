@@ -6,6 +6,7 @@
 
 %%
 
+
 bool {return BOOL;}
 char {return CHAR;}
 int {return INT;}
@@ -21,7 +22,7 @@ while {return WHILE;}
 for {return FOR;}
 
 var {return VAR;}
-arg-> {return ARG;}
+arg\-\> {return ARG;}
 
 function {return FUNC;}
 return {return RETURN;}
