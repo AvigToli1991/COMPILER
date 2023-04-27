@@ -57,20 +57,20 @@ program: processes {$$=mknode("CODE",
 								mknode(")",NULL,NULL);} 
 ;
 
-processes : process processes {$$=mknode("",$1,$2);} 
+processes: process processes {$$=mknode("",$1,$2);} 
 			    			| {$$=NULL;}
 ;
 
-process : FUNC ID "(" args ")" ":" prosSplit 
+process: FUNC ID "(" args ")" ":" prosSplit 
 
-{$$=mknode("FUNC",
-				mknode("PRINT_TOKEN",
-						mknode($2,NULL,NULL),
-						mknode("\n",$4,$7)),				
-				mknode(")",NULL,NULL));}
+											{$$=mknode("FUNC",
+															mknode("PRINT_TOKEN",
+																	mknode($2,NULL,NULL),
+																	mknode("\n",$4,$7)),				
+															mknode(")",NULL,NULL));}
 ;
 
-prosSplit : type "{" bodyret "}" 
+prosSplit: type "{" bodyret "}" 
 		
 								{$$=mknode("\n",
 												mknode("RET",
@@ -110,13 +110,13 @@ argss: ";" arg argss {$$=mknode("",$2,NULL);}
 	      | {$$=NULL;}
 ;
 
-arg : ARG ID ids ":" type  {$$=mknode("PRINT_TOKEN",
+arg: ARG ID ids ":" type  {$$=mknode("",
 										$5,
 										mknode("PRINT_TOKEN",
 															mknode($2,$3,NULL),NULL));}
 ;
 
-ids : ","ID ids {$$=mknode("PRINT_TOKEN",mknode($2,$3,NULL),NULL);}
+ids: ","ID ids {$$=mknode("PRINT_TOKEN",mknode($2,$3,NULL),NULL);}
               | {$$=NULL;}
 ;
 
@@ -130,14 +130,14 @@ type: INT     {$$=mknode("INT",NULL,NULL);}    |
       REALPTR {$$=mknode("REALPTR",NULL,NULL);}
 ;    	
 
-funccall : ID "(" funcargs ")"";" 
+funccall: ID "(" funcargs ")"";" 
 
-{$$=mknode("CALL FUNC", 
-					mknode("PRINT_TOKEN",
-										mknode($1,mknode("\n",NULL,NULL),NULL),
-										mknode("PARAMS",
-						 								$3,
-														mknode(")",NULL,NULL)));}
+								{$$=mknode("CALL FUNC", 
+													mknode("PRINT_TOKEN",
+																		mknode($1,mknode("\n",NULL,NULL),NULL),
+																		mknode("PARAMS",
+																						$3,
+																						mknode(")",NULL,NULL)));}
 ;
 
 funcargs:ID moreargs 
@@ -150,13 +150,15 @@ moreargs: "," ID moreargs {$$=mknode("PRINT_TOKEN",mknode($1,NULL,NULL),$2);}
 ;
 
 vardic: VAR ID varasign varsdic ":" type ";" 
-{$$=mknode("DECLARATION",
-						$6,
-						mknode("=",
-								 $3,
-								 mknode($2,
-								 			$4,
-								 			mknode(")",NULL,NULL))));}
+						{$$=mknode("DECLARATION",
+												$6,
+												mknode("\n",
+															mknode("=",
+																		$3,
+																		mknode($2,
+																					$4,
+																					mknode(")",NULL,NULL))),
+															NULL));}
 		
 ;
 
@@ -224,10 +226,10 @@ forlop: FOR "(" init ";" expression ";" update ")" "{"lopbody"}"
 ;
 
 init: ID "=" intval {$$ = mknode("=",
-									mknode("PRINT_TOKEN",
-														mknode($3,NULL,NULL),
-														mknode(")",NULL,NULL)),
-									$1;}
+									mknode("",
+												$3,
+												mknode(")",NULL,NULL)),
+									mknode($1,NULL,NULL);}
 ;
 intval: DEC_VAL {$$=mknode($1,NULL,NULL);} | 
 		ID		 {$$=mknode($1,NULL,NULL);}
@@ -245,24 +247,24 @@ expression: "("expression")" lopexp     {$$=mknode("",$2,$3);} |
 																mknode(")",NULL,NULL));}  
 ;
 
-not : NOT {$$ = mknode($1)} | {$$=NULL;}
+not: NOT {$$ = mknode($1)} | {$$=NULL;}
 ;
 
 notexp: NOT splitnot {$$=mknode("PRINT_TOKEN",mknode($1,$2,NULL),NULL);}
 ;
 
-splitnot: ex                {$$=mknode("",$1,NULL);}  | 
-	 "(" expression ")" 	{$$=mknode("",$2,NULL);} 
+splitnot: ex                    {$$=mknode("",$1,NULL);}  | 
+	 	  "(" expression ")" 	{$$=mknode("",$2,NULL);} 
 ;
 
 
 lopexp: oper expression lopexp
-											{$$=mknode("OPERATION",
-																	mknode("",
-																				$2,
-																				mknode("",$1,$3)),
-																	mknode(")",NULL,NULL) ;}
-										|   {$$=NULL;}
+								{$$=mknode("OPERATION",
+														mknode("",
+																	$2,
+																	mknode("",$1,$3)),
+														mknode(")",NULL,NULL) ;}
+							|   {$$=NULL;}
 ;
 
 oper: EQ    {$$=mknode($1,NULL,NULL);}|
@@ -282,20 +284,11 @@ update:ID updatechage {$$=mknode("UPDATE",
 										mknode(")",NULL,NULL));}
 ;
 
-updatechage : "+""+"         {$$=mknode("+1",NULL,NULL);}		         |
+updatechage: "+""+"          {$$=mknode("+1",NULL,NULL);}		         |
 	          "-""-"         {$$=mknode("-1",NULL,NULL);}		         |
-	          "*""=" DEC_VAL {$$=mknode("*",mknode("PRINT_TOKEN",
-			  													mknode($3,NULL,NULL),
-																NULL),
-											NULL);} |
-	          "+""=" DEC_VAL {$$=mknode("+",mknode("PRINT_TOKEN",
-			  													mknode($3,NULL,NULL),
-																NULL),
-											NULL);} |
-	          "-""=" DEC_VAL {$$=mknode("-",mknode("PRINT_TOKEN",
-			  													mknode($3,NULL,NULL),
-																NULL),
-											NULL);}
+	          "*""=" DEC_VAL {$$=mknode("*",$3,NULL);} 					 |
+	          "+""=" DEC_VAL {$$=mknode("+",$3,NULL);} 					 |
+	          "-""=" DEC_VAL {$$=mknode("-",$3,NULL);} 
 ;
 
 lopbody: body    {$$=mknode("",$1,NULL);}|
@@ -303,34 +296,58 @@ lopbody: body    {$$=mknode("",$1,NULL);}|
 ;
 
 whilelop: WHILE "(" expression ")" "{"lopbody"}"
-	{$$=mknode(""
-		,mknode("EXPRESSION",mknode("",$3,NULL),NULL)
-		,mknode("{",mknode("",$6),NULL));} 
+			{$$=mknode("WHILE",
+								mknode("EXPRESSION",
+													mknode("",
+																$3,
+																mknode("{}",
+																			$6,
+																			mknode(")",NULL,NULL))),
+													mknode(")",NULL,NULL)),
+								mknode(")",NULL,NULL));}
 ;
 
 dolop: DO "{" lopbody "}" WHILE "(" expression ")"
-	{$$=mknode("{",
-		mknode("",$3,NULL),
-		mknode("EXPRESSION",mknode("",$7,NULL),NULL);}
+	{$$=mknode("DO-WHILE",
+					mknode("{}",
+								mknode("",
+										$3,
+										mknode(")",
+													mknode("EXPRESSION",
+																			$7,
+																			mknode(")",NULL,NULL)),
+													NULL))),
+								NULL),
+					mknode(")",NULL,NULL));}
 ;
 
-ifstate: IF "(" expression ")" "{" lopbody "}" elstate
-{$$=mknode("IF-ELSE",$3,mknode("{",mknode("",$6,$8)));}
+ifstate: IF "(" expression ")" "{" lopbody "}" elstate 
+	{$$ = mknode("IF-ELSE",
+						mknode("EXPRESSION",
+											$3,
+											mknode("{}",
+														mknode("",
+																$6,
+																mknode(")",NULL,NULL)),
+														$8)),
+						mknode(")",NULL,NULL));}
 ;
 
-elstate : "{"lopbody"}"  {$$=mknode("{",mknode("",$2,NULL),NULL);}
-			|{$$={NULL;} 
+elstate: "{"lopbody"}"  {$$=mknode("{}",
+										mknode("",$2,NULL),
+										mknode(")",NULL,NULL));}
+			|{$$=NULL;} 
 ;     
       
 
-body: cmt bodysplit {$$=mknode("",$2,NULL);};
+body: cmt bodysplit {$$=mknode("",$2,NULL);}
 
 bodysplit: process      body  {$$=mknode("",$1,$2);}|
            ifstate      body  {$$=mknode("",$1,$2);}|
            vardic       body  {$$=mknode("",$1,$2);}|
            lop          body  {$$=mknode("",$1,$2);}|
       	   funccall     body  {$$=mknode("",$1,$2);}|
-      	   "{" body "}" body  {$$=mknode("{",
+      	   "{" body "}" body  {$$=mknode("{}",
       	   									mknode("",$2,$4),
 											mknode(")",NULL,NULL));}
 							| {$$=NULL;}
@@ -340,16 +357,15 @@ bodyret:body RETURN retval {$$=mknode("",
 										$1,
 										mknode("RETURN_VAL",
 															$3,
-															mknode(")",NULL,NULL));}
-										
-
-										
-										;};
+															mknode(")",NULL,NULL)));}
+;
 
 retval: ID         {$$=mknode("PRINT_TOKEN",mknode($1,NULL,NULL),NULL);} |
         funccall   {$$=mknode("",$1,NULL);} |
-        val        {$$=mknode("PRINT_TOKEN",mknode($1,NULL,NULL),NULL);} |
-        expression {$$=mknode("",$1,NULL);}
+        val        {$$=mknode("",$1,NULL);} |
+        expression {$$=mknode("EXPRESSION",
+											$1,
+											mknode(")",NULL,NULL));}
 ;
  
 
@@ -370,281 +386,104 @@ node* mknode (char *token, node *left, node *right)
 	return newnode;
 }
 
-void printTabs(int n)
-{
-	int i;
-	for(i=0;i<n/3;i++)
-		printf(" ");
-}
-
 void printSpace(int num){
 	printf("%s"," "*num);
 }
+void printNodesTree(node* tree){
+	if(tree != NULL){
 
+	}
+}
 void Printtree(node* tree)
 {	
-	int spaces = 0;
 	
-	if((strcmp(tree->token,"CODE") == 0 )        ||
-	   (strcmp(tree->token, "FUNC") == 0)        ||
-	   (strcmp(tree->token, "BODY") == 0)        ||
-	   (strcmp(tree->token, "ARGS") == 0)        ||
-	   (strcmp(tree->token, "{") == 0)           ||
-	   (strcmp(tree->token, "RETURN_VAL") == 0)  || 
-	   (strcmp(tree->token, "CALL FUNC") == 0)   ||
-	   (strcmp(tree->token, "PARAMS") == 0)		 ||
-	   (strcmp(tree->token, "RET") == 0)		 ||
-	   (strcmp(tree->token,"DECLARATION") == 0 ) ||
-	   (strcmp(tree->token,"=") == 0)            ||
-	   (strcmp(tree->token,"FOR") == 0)		     ||
-	   (strcmp(tree->token,"WHILE") == 0)		 ||
-	   (strcmp(tree->token,"DO-WHILE") == 0)	 ||
-	   (strcmp(tree->token,"INIT") == 0)         ||
-	   (strcmp(tree->token,"EXPRESSION") == 0))
-	{
-		
-		printSpace(spaces);
-		if(strcmp(tree->token, "{") == 0){
+	if (tree != NULL){
+		if((strcmp(tree->token,"CODE") == 0 )        ||
+		(strcmp(tree->token, "FUNC") == 0)        ||
+		(strcmp(tree->token, "BODY") == 0)        ||
+		(strcmp(tree->token, "ARGS") == 0)        ||
+		(strcmp(tree->token, "{}") == 0)          ||
+		(strcmp(tree->token, "RETURN_VAL") == 0)  || 
+		(strcmp(tree->token, "CALL FUNC") == 0)   ||
+		(strcmp(tree->token, "PARAMS") == 0)		 ||
+		(strcmp(tree->token, "RET") == 0)		 ||
+		(strcmp(tree->token,"DECLARATION") == 0 ) ||
+		(strcmp(tree->token,"=") == 0)            ||
+		(strcmp(tree->token,"FOR") == 0)		     ||
+		(strcmp(tree->token,"WHILE") == 0)		 ||
+		(strcmp(tree->token,"DO-WHILE") == 0)	 ||
+		(strcmp(tree->token,"INIT") == 0)         ||
+		(strcmp(tree->token,"EXPRESSION") == 0))
+		{
+			
+			printSpace(spaces);
+			
+			if(strcmp(tree->token, "{}") == 0){
 
-			printf("(BLOCK \n");
-		}
-		else if(strcmp(tree->token, "DECLARATION") == 0){
+				printf("(BLOCK \n");
+			}
+			else if (strcmp(tree->token, "=") == 0){
 
-			printf("(%s %s\n",tree->token, tree->left->token);
+				if(tree->left != NULL){
+					printf("(%s %s\n",tree->token,tree->right->token);
+				}
+				else{
 
-		}
-		else if (strcmp(tree->token, "=") == 0){
+					printf("%s \n",tree->right->token);
+					spaces -= 4;;
+				}
+			}
+			else if(strcmp(tree->token,"OPERATION")){
 
-			if(tree->left != NULL){
-				printf("(%s %s\n",tree->token,tree->right->token);
+				printf("(%s \n",tree->left->left->token);
+
 			}
 			else{
 
-				printf("%s \n",tree->right->token);
-				spaces -= 4;;
+				printf("(%s \n",tree->token);
 			}
-		}
-		else if(strcmp(tree->token,"OPERATION")){
-
-			printf("(%s \n",tree->left->left->token);
-
-		}
-		else{
-
-			printf("(%s \n",tree->token);
-		}
-		
-		spaces += 4;
-		printSpace(spaces);
-		
-	}
-	else if (strcmp(tree->token, "PRINT_TOKEN") == 0)
-	{
-
-		printf("%s ",tree->left->token);
-	}
-
-	else if (strcmp(tree->token, "\n") == 0){
-		printf("\n");
-		printSpace(spaces);
-	}
-	else if (strcmp(tree->token, "(") == 0){
-
-		node *temp = tree->left
-
-		printf("%s %s " , tree->token , temp->left->token);
-	
-		do{
 			
-			printf(temp->right->token);
-			temp = temp->right->left;
-
-		}while(temp != NULL)
-		printf(")");
-			
-	}
-
-	else if(strcmp(tree->token, "PARAMS") == 0){
-		
-		if(tree->left != NULL){
-			
-			printf("%s",spaces);
 			spaces += 4;
-			printf("(PARAMS ");
-			node* temp = tree->left;
-			while (temp != NULL){
-				printf("%s ", temp->left->token);
-				temp = temp->right;
-			}
-			printf(")");
+			printSpace(spaces);
+			
 		}
-		
-		
+
+		else if (strcmp(tree->token, "PRINT_TOKEN") == 0)
+		{
+
+			printf("%s ",tree->left->token);
+		}
+
+		else if (strcmp(tree->token, "\n") == 0){
+			printf("\n");
+			printSpace(spaces);
+		}
+
+		else ((strcmp(tree->token,"STR_VAL") == 0)    ||
+			(strcmp(tree->token,"REAL_VAL") == 0)    ||
+			(strcmp(tree->token,"CHAR_VAL") == 0)    ||
+			(strcmp(tree->token,"DEC_VAL") == 0)     ||
+			(strcmp(tree->token,"HEX_VAL") == 0)     ||
+			(strcmp(tree->token,"BOOLVAL") == 0))    ||
+			(strcmp(tree->token,"BOOL") == 0)        ||
+			(strcmp(tree->token,"INT") == 0)         ||
+			(strcmp(tree->token,"REAL") == 0)        ||
+			(strcmp(tree->token,"STRING") == 0)      ||
+			(strcmp(tree->token,"CHAR") == 0)        ||
+			(strcmp(tree->token,"INTPTR") == 0))     ||
+			(strcmp(tree->token,"CHARPTR") == 0))    ||
+			(strcmp(tree->token,"REALPTR") == 0))
+		{
+			printf("%s",tree->token);
+		}
+		Printtree(tree->left);
+		Printtree(tree->right);
 	}
-	else  if (strcmp(tree->token, "RET") == 0){
-		printf("(RET %s )",tree->left->left->token);
-	}
-	else if ((strcmp(tree->token,"STR_VAL") == 0) ||
-		 (strcmp(tree->token,"REAL_VAL") == 0)||
-		 (strcmp(tree->token,"CHAR_VAL") == 0)||
-		 (strcmp(tree->token,"DEC_VAL") == 0) ||
-		 (strcmp(tree->token,"HEX_VAL") == 0) ||
-		 (strcmp(tree->token,"BOOLVAL") == 0))||
-		 (strcmp(tree->token,"BOOL") == 0)     ||
-		 (strcmp(tree->token,"INT") == 0)      ||
-		 (strcmp(tree->token,"REAL") == 0)     ||
-		 (strcmp(tree->token,"STRING") == 0)   ||
-		 (strcmp(tree->token,"CHAR") == 0)     ||
-		 (strcmp(tree->token,"INTPTR") == 0))  ||
-		 (strcmp(tree->token,"CHARPTR") == 0)) ||
-		 (strcmp(tree->token,"REALPTR") == 0))
-	{
-		printf("%s",tree->token);
+	else{
+		printf("NO CODE TO PRESENT");
 	}
 	
-	else if (strcmp(tree->token,"RIGHTBARCKET")){
-		printf(")\n");
-	}
-	else if (strcmp(tree->token,"VOID")){
-		printf("VOID");
-	}
-	//printf("\nDEBUG: %s\n", tree->token);
-	int flag = 4;
-	//printTabs(1);
-	if(strcmp(tree->token, "var") == 0)
-	{
-		printf("(DECLARE ");
-		flag=2;
-	}
-	else if(strcmp(tree->token, "TYPE") == 0)
-	{
-		printf("(TYPE ");
-		flag=2;
-	}
-	else if(strcmp(tree->token, "if") == 0)
-	{
-		printf("(IF\n");
-		flag = 1;
-	}
-	else if(strcmp(tree->token, "while") == 0)
-	{
-		printf("(WHILE\n");
-		flag = 1;
-	}
-	else if(strcmp(tree->token, "for") == 0)
-	{
-		printf("(FOR\n");
-		flag = 1;
-	}
-	else if(strcmp(tree->token, "FUNCTION") == 0 ||strcmp(tree->token, "proc") == 0 ||strcmp(tree->token, "CODE") == 0||strcmp(tree->token, "Call func") == 0)
-	{
-		printf("(%s \n",tree->token);
-		flag= 2;
-	}
-		else if(strcmp(tree->token, "ARGS") == 0)
-	{
-		printf("(ARGS ");
-		if(tree->left)
-		{
-			flag = 2;
-			printf("\n");
-
-		}
-		else{
-			printf(" NONE)\n");
-		}
-	}
-	else if(strcmp(tree->token, "IF-ELSE") == 0)
-	{
-		printf("(IF-ELSE\n");
-		printlevel--;
-		flag = 1;
-	}
-	else if(strcmp(tree->token, "RETURN") == 0)
-	{
-		printf("(RET ");
-		flag = 2;
-	}
-	else if(strcmp(tree->token, "{") == 0)
-	{
-        printf("(BLOCK\n");
-	}
-	else if(strcmp(tree->token, "}") == 0)
-	{
-		printf(")\n");
-	}
-	else if(strcmp(tree->token, "") == 0);
-	else if(strcmp(tree->token, "(") == 0)
-			printf("(");
-	else if(strcmp(tree->token, "\n") == 0)
-			printf("\n");
-	else if(strcmp(tree->token, ")") == 0)
-			printf(")\n");
-	else if(strcmp(tree->token, ",") == 0)
-			printf(",");
-	else if(strcmp(tree->token, ";") == 0)
-			printf("\n");
-	else if(strcmp(tree->token, "&&") == 0 ||
-strcmp(tree->token, "/") == 0 ||
-strcmp(tree->token, "=") == 0 ||
-strcmp(tree->token, "==") == 0 ||
-strcmp(tree->token, ">") == 0 ||
-strcmp(tree->token, ">=") == 0 ||
-strcmp(tree->token, "<") == 0 ||
-strcmp(tree->token, "<=") == 0 ||
-strcmp(tree->token, "-") == 0 ||
-strcmp(tree->token, "!") == 0 ||
-strcmp(tree->token, "!=") == 0 ||
-strcmp(tree->token, "||") == 0 ||
-strcmp(tree->token, "+") == 0 ||
-strcmp(tree->token, "*") == 0 ||
-strcmp(tree->token, "&") == 0 ||
-strcmp(tree->token, "^") == 0 ||
-strcmp(tree->token, "|") == 0 ||
-strcmp(tree->token, ",") == 0 )
-	{
-			printf("(%s",tree->token);
-			flag=1;
-			if(strcmp(tree->token, "=") == 0)
-				flag=2;
-
-	}
-	else
-	{
-		if((tree && !tree->left && !tree->right)
-		||strcmp(tree->token, "Main") == 0)
-		{
-			printf("%s ", tree->token);
-		}
-		else
-		{
-			printlevel++;
-			printf("%s", tree->token);
-			printlevel--;
-
-		}
-	}
-	if (tree->left)
-	{
-		printlevel++;
-		Printtree(tree->left);
-		printlevel--;
-	}
-
-	if (tree->right)
-	{
-		printlevel++;
-		Printtree(tree->right);
-		printlevel--;
-
-	}
-	if(flag == 2)
-		printf(")\n");
-
-	if(flag == 1)
-		printf(")");
-	if(flag == 0)
-		printf("\n)");
+	
 }
 
 int yyerror(char *e)
@@ -655,4 +494,4 @@ int yyerror(char *e)
 	fprintf(stderr, "does not accept '%s'\n",yytext);
 
 	return 0;
-} */
+} 
