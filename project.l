@@ -6,6 +6,7 @@
 
 %%
 
+
 bool {return BOOL;}
 char {return CHAR;}
 int {return INT;}
