@@ -1,7 +1,8 @@
 /*scanner-file*/
 %{
 #include<stdio.h>
-#include "y.tab.h"
+
+
 %}
 
 %%
@@ -26,9 +27,9 @@ arg\-\> {return ARG;}
 
 function {return FUNC;}
 return {return RETURN;}
-null {return NULL;}
+null {return NUL;}
 void {return VOID;}
-do {return DO}
+do {return DO;}
 
 "&&" {return AND;}
 "/" return yytext[0];
