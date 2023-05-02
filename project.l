@@ -1,34 +1,33 @@
 /*scanner-file*/
 %{
 #include<stdio.h>
-#include "y.tab.h"
 
 %}
 
 %%
 
-"bool" {return BOOL;}
-"char" {return CHAR;}
-"int" {return INT;}
-"real" {return REAL;}
-"string" {return STRING;}
-"int\*" {return INTPTR;}
-"char\*" {return CHARPTR;}
-"real\*" {return REALPTR;}
+bool return BOOL;
+char return CHAR;
+int return INT;
+real return REAL;
+string return STRING;
+int\* return INTPTR;
+char\* return CHARPTR;
+real\* return REALPTR;
 
-"if" {return IF;}
-"else" {return ELSE;}
-"while" {return WHILE;}
-"for" {return FOR;}
+if return IF;
+else return ELSE;
+while return WHILE;
+for return FOR;
 
-"var" {return VAR;}
-"arg\-\>" {return ARG;}
+var return VAR;
+arg\-\> return ARG;
 
-"function" {return FUNC;}
-"return" {return RETURN;}
-"null" {return NUL;}
-"void" {return VOID;}
-"do" {return DO;}
+function return FUNC;
+return return RETURN;
+null return NUL;
+void return VOID;
+do return DO;
 
 "&&" {return AND;}
 "/" return yytext[0];

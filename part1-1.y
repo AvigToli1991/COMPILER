@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "lex.yy.c"
-#include "y.tab.h"
+#include"lex.yy.c"
+
 
 typedef struct node
 {
@@ -285,7 +285,7 @@ intval: DEC_VAL {$$=mknode($1,NUL,NUL);} |
 		ID		 {$$=mknode($1,NUL,NUL);}
 ;
 expression: '(' expression ')' lopexp     {$$=mknode("",$2,$3);} |
-            notexp lopexp    			{$$=mknode("",$1,$3);} |
+            notexp lopexp    			{$$=mknode("",$1,$2);} |
 			ex oper ex  lopexp		    {$$=mknode("OPERATION",
 																mknode("",
 																			$2,
@@ -420,7 +420,6 @@ retval: ID         {$$=mknode("PRINT_TOKEN",mknode($1,NUL,NUL),NUL);} |
  
 
 %%
-#include"lex.yy.c"
 int main()
 {
 	return yyparse(); 
