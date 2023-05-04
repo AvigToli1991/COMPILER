@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include"lex.yy.c"
-
 
 typedef struct node
 {
@@ -12,14 +10,15 @@ typedef struct node
 	struct node *right;
 } node;
 
-node* mknode(char* token, node *left, node *right);
+node* mknode(char *token, node *left, node *right);
 void printTree(node *tree);
 
 void printSpace(int n);
 
 int yylex();
 int yyerror(char *e);
-
+int spaces=0;
+#define YYSTYPE struct node*
 %}
 
 %union
@@ -29,13 +28,14 @@ int yyerror(char *e);
 }
 
 
-%token<string> COMMENT
+%token<string> COMMENT LENGTH
 %token<string> BOOL INT REAL STRING CHAR VAR ARG
 %token<string> INTPTR CHARPTR REALPTR
 %token<string> IF ELSE DO WHILE FOR FUNC VOID RETURN 
 %token<string> AND OR EQ GTE LTE NOTEQ NOT
 %token<string> ID 
 %token<string> STR_VAL REAL_VAL CHAR_VAL NUL DEC_VAL HEX_VAL BOOLVAL
+
 
 
 /*
@@ -128,7 +128,7 @@ prosSplit: type '{' bodyret '}'
 												mknode("\n",
 															mknode("BODY",
 																		$3,
-																		mknode(")",NUL,NUL))));} 
+																		mknode(")",NUL,NUL)),NUL));} 
 								
 			| VOID '{' body '}'    
 
@@ -139,7 +139,7 @@ prosSplit: type '{' bodyret '}'
 											mknode("\n",
 														mknode("BODY",
 																	$3,
-																	mknode(")",NUL,NUL))));} 
+																	mknode(")",NUL,NUL)),NUL));} 
 ;
 	  
 
@@ -187,7 +187,7 @@ funccall: ID '(' funcargs ')'';'
 																		mknode("PARAMS",
 																						$3,
 																						mknode(")",NUL,NUL))
-																						));}
+																						),NUL);}
 ;
 
 funcargs:ID moreargs 
@@ -195,7 +195,7 @@ funcargs:ID moreargs
 		   			|  {$$=NUL;}
 ;
 
-moreargs: ',' ID moreargs {$$=mknode("PRINT_TOKEN",mknode($1,NUL,NUL),$2);}
+moreargs: ',' ID moreargs {$$=mknode("PRINT_TOKEN",mknode($2,NUL,NUL),$3);}
 			| {$$=NUL;}
 ;
 
@@ -224,7 +224,7 @@ varsdic: ',' ID varasign varsdic
 varasign: '=' ex {$$=mknode("",$2,NUL);}| {$$=NUL;}
 ;
       
-ex: '('ex')' {$$=mknode("",$2,NUL,NUL)}| 
+ex: '('ex')' {$$=mknode("",$2,NUL)}| //removes one of the nuls (the ritgh one)
 	val      {$$=mknode("PRINT_TOKEN",$1,NUL);}|
     ID       {$$=mknode("PRINT_TOKEN",mknode($1,NUL,NUL),NUL);}|
 	funccall {$$=mknode("",$1,NUL);} |
@@ -256,7 +256,7 @@ lop: forlop   {$$=mknode("",$1,NUL)}      |
      dolop    {$$=mknode("",$1,NUL)}
 ;
 forlop: FOR '(' init ';' expression ';' update ')' '{'lopbody'}'
-	{$$=mknode("FOR",
+	/* {$$=mknode("FOR",
 					mknode("INIT",
 								mknode("",
 										$3,
@@ -269,10 +269,33 @@ forlop: FOR '(' init ';' expression ';' update ')' '{'lopbody'}'
 																				$7,
 																				mknode(")",NUL,NUL)),
 																mknode("\n",
-																			mknode($9,$10,NUL),
+																			mknode("{}",$10,NUL),
 																			NUL))),
 								mknode(")",NUL,NUL)),
-					mknode(")",NUL,NUL)));}
+					mknode(")",NUL,NUL)));} */
+	{
+		$$=mknode("FOR" ,
+						mknode("INIT" ,
+										mknode("",
+												$3,
+												mknode("\n",
+															mknode("EXPRESSION" ,
+																				$5,
+																				mknode(")",NUL,NUL)),
+															mknode("\n",
+																		mknode("UPDATE",
+																						$7,
+																						mknode(")",NUL,NUL)),
+																		mknode("\n",
+																					mknode("{}",
+																								$10,
+																								NUL),
+																					NUL)))),
+										mknode(")" , NUL,NUL)),
+						mknode(")",NUL,NUL));
+						
+									
+	}
 ;
 
 init: ID '=' intval {$$ = mknode("=",
@@ -284,8 +307,8 @@ init: ID '=' intval {$$ = mknode("=",
 intval: DEC_VAL {$$=mknode($1,NUL,NUL);} | 
 		ID		 {$$=mknode($1,NUL,NUL);}
 ;
-expression: '(' expression ')' lopexp     {$$=mknode("",$2,$3);} |
-            notexp lopexp    			{$$=mknode("",$1,$2);} |
+expression: '(' expression ')' lopexp     {$$=mknode("(",$2,$4);} |
+            notexp lopexp    			{$$=mknode(" ",$1,$2);} |
 			ex oper ex  lopexp		    {$$=mknode("OPERATION",
 																mknode("",
 																			$2,
@@ -297,7 +320,7 @@ expression: '(' expression ')' lopexp     {$$=mknode("",$2,$3);} |
 																mknode(")",NUL,NUL));}  
 ;
 
-not: NOT {$$ = mknode($1)} | {$$=NUL;}
+not: NOT {$$ = mknode($1,NUL,NUL)} | {$$=NUL;}
 ;
 
 notexp: NOT splitnot {$$=mknode("PRINT_TOKEN",mknode($1,$2,NUL),NUL);}
@@ -321,8 +344,8 @@ oper: EQ    {$$=mknode($1,NUL,NUL);}|
       GTE   {$$=mknode($1,NUL,NUL);}|
       LTE   {$$=mknode($1,NUL,NUL);}|
       NOTEQ {$$=mknode($1,NUL,NUL);}|
-      '>'   {$$=mknode($1,NUL,NUL);}|
-      '<'   {$$=mknode($1,NUL,NUL);}|
+      /* '>'   {$$=mknode($1,NUL,NUL);}|
+      '<'   {$$=mknode($1,NUL,NUL);}| */
 	  AND   {$$=mknode($1,NUL,NUL);}| 
       OR    {$$=mknode($1,NUL,NUL);}
 ;
@@ -420,6 +443,11 @@ retval: ID         {$$=mknode("PRINT_TOKEN",mknode($1,NUL,NUL),NUL);} |
  
 
 %%
+
+
+#include"lex.yy.c"
+
+
 int main()
 {
 	return yyparse(); 
@@ -436,13 +464,20 @@ node* mknode (char *token, node *left, node *right)
 }
 
 void printSpace(int num){
-	printf("%s"," "*num);
+	int i = 0;
+	while (i < num)
+		{
+			printf(" ");
+			i+=1;
+		}
+	/* char space = ' ';
+	printf("%s",space*num); */
 }
-void printNodesTree(node* tree){
+/* void printNodesTree(node* tree){
 	if(tree != NUL){
 
 	}
-}
+} */
 void printTree(node* tree)
 {	
 	
@@ -508,7 +543,7 @@ void printTree(node* tree)
 			printSpace(spaces);
 		}
 
-		else ((strcmp(tree->token,"STR_VAL") == 0)    ||
+		else if ((strcmp(tree->token,"STR_VAL") == 0)    ||
 			(strcmp(tree->token,"REAL_VAL") == 0)    ||
 			(strcmp(tree->token,"CHAR_VAL") == 0)    ||
 			(strcmp(tree->token,"DEC_VAL") == 0)     ||

@@ -21,7 +21,7 @@ while return WHILE;
 for return FOR;
 
 var return VAR;
-arg\-\> return ARG;
+arg-> return ARG;
 
 function return FUNC;
 return return RETURN;
@@ -52,12 +52,13 @@ do return DO;
 "(" return yytext[0];
 ")" return yytext[0];
 "[" return yytext[0];
-"]" return yytext[0];
+"]" return yytext[0]; 
+
 
 "/""*".*"*""/" {return COMMENT;}
 
 true|false {return BOOLVAL;}
-[a-zA-Z][a-zA-Z0-9_]* { yylval.string= strdup(yytext);return ID;}
+[a-zA-Z][a-zA-Z0-9_]* { yylval.string= strdup(yytext);return ID;} //ask avigdor !!!!!!
 "\""[^"]*"\"" {yylval.string= strdup(yytext);return STR_VAL;}
 \'.\' {yylval.string= strdup(yytext);return CHAR_VAL;}
 [+-]?[1-9][0-9]*|[0-9] {yylval.string= strdup(yytext);return DEC_VAL;}
