@@ -31,7 +31,7 @@ do return DO;
 
 "&&" {return AND;}
 "/" return yytext[0];
-"=" return yytext[0];
+"=" return ASS;
 "==" {return EQ;}
 ">" return GT;
 ">=" {return GTE;}
