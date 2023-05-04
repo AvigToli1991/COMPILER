@@ -13,7 +13,7 @@
 
  #line 8 "/usr/share/bison++/bison.h"
 
-#line 24 "part1-1.y"
+#line 23 "part1-1.y"
 typedef union
 {
     struct node *node;
@@ -218,14 +218,17 @@ typedef
 #define	LTE	282
 #define	NOTEQ	283
 #define	NOT	284
-#define	ID	285
-#define	STR_VAL	286
-#define	REAL_VAL	287
-#define	CHAR_VAL	288
-#define	NUL	289
-#define	DEC_VAL	290
-#define	HEX_VAL	291
-#define	BOOLVAL	292
+#define	GT	285
+#define	LT	286
+#define	ASS	287
+#define	ID	288
+#define	STR_VAL	289
+#define	REAL_VAL	290
+#define	CHAR_VAL	291
+#define	NUL	292
+#define	DEC_VAL	293
+#define	HEX_VAL	294
+#define	BOOLVAL	295
 
 
 #line 169 "/usr/share/bison++/bison.h"
@@ -301,6 +304,9 @@ static const int GTE;
 static const int LTE;
 static const int NOTEQ;
 static const int NOT;
+static const int GT;
+static const int LT;
+static const int ASS;
 static const int ID;
 static const int STR_VAL;
 static const int REAL_VAL;
@@ -344,14 +350,17 @@ static const int BOOLVAL;
 	,LTE=282
 	,NOTEQ=283
 	,NOT=284
-	,ID=285
-	,STR_VAL=286
-	,REAL_VAL=287
-	,CHAR_VAL=288
-	,NUL=289
-	,DEC_VAL=290
-	,HEX_VAL=291
-	,BOOLVAL=292
+	,GT=285
+	,LT=286
+	,ASS=287
+	,ID=288
+	,STR_VAL=289
+	,REAL_VAL=290
+	,CHAR_VAL=291
+	,NUL=292
+	,DEC_VAL=293
+	,HEX_VAL=294
+	,BOOLVAL=295
 
 
 #line 215 "/usr/share/bison++/bison.h"

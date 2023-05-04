@@ -33,10 +33,10 @@ do return DO;
 "/" return yytext[0];
 "=" return yytext[0];
 "==" {return EQ;}
-">" return yytext[0];
+">" return GT;
 ">=" {return GTE;}
 "<=" {return LTE;}
-"<" return yytext[0];
+"<" return LT;
 "-" return yytext[0];
 "!" {return NOT;}
 "!=" {return NOTEQ;}

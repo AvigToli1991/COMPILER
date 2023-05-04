@@ -943,7 +943,7 @@ YY_RULE_SETUP
 case 24:
 YY_RULE_SETUP
 #line 36 "project.l"
-return yytext[0];
+return GT;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
@@ -958,7 +958,7 @@ YY_RULE_SETUP
 case 27:
 YY_RULE_SETUP
 #line 39 "project.l"
-return yytext[0];
+return LT;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP

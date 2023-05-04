@@ -18,7 +18,6 @@ void printSpace(int n);
 int yylex();
 int yyerror(char *e);
 int spaces=0;
-#define YYSTYPE struct node*
 %}
 
 %union
@@ -32,7 +31,7 @@ int spaces=0;
 %token<string> BOOL INT REAL STRING CHAR VAR ARG
 %token<string> INTPTR CHARPTR REALPTR
 %token<string> IF ELSE DO WHILE FOR FUNC VOID RETURN 
-%token<string> AND OR EQ GTE LTE NOTEQ NOT
+%token<string> AND OR EQ GTE LTE NOTEQ NOT GT LT ASS
 %token<string> ID 
 %token<string> STR_VAL REAL_VAL CHAR_VAL NUL DEC_VAL HEX_VAL BOOLVAL
 
@@ -102,101 +101,101 @@ project: cmt program {printTree($1);}
 cmt: COMMENT cmt | 
 ;
 
-program: processes {$$=mknode("CODE",$1,mknode(")",NUL,NUL));} 
+program: processes {$$=mknode("CODE",$1,mknode(")",NULL,NULL));} 
 ;
 
 
 processes: process processes {$$=mknode("",$1,$2);} 
-			    			| {$$=NUL;}
+			    			| {$$=NULL;}
 ;
 
 process: FUNC ID '(' args ')' ':' prosSplit 
 
 											{$$=mknode("FUNC",
 															mknode("PRINT_TOKEN",
-																	mknode($2,NUL,NUL),
+																	mknode($2,NULL,NULL),
 																	mknode("\n",$4,$7)),				
-															mknode(")",NUL,NUL));}
+															mknode(")",NULL,NULL));}
 ;
 
 prosSplit: type '{' bodyret '}' 
 		
 								{$$=mknode("\n",
 												mknode("RET",
-														mknode("PRINT_TOKEN",$1,NUL),
-														mknode(")",NUL,NUL)),
+														mknode("PRINT_TOKEN",$1,NULL),
+														mknode(")",NULL,NULL)),
 												mknode("\n",
 															mknode("BODY",
 																		$3,
-																		mknode(")",NUL,NUL)),NUL));} 
+																		mknode(")",NULL,NULL)),NULL));} 
 								
 			| VOID '{' body '}'    
 
 								{$$=mknode("\n",
 											mknode("RET",
-													mknode("PRINT_TOKEN",mknode("VOID",NUL,NUL),NUL),
-													mknode(")",NUL,NUL)),
+													mknode("PRINT_TOKEN",mknode("VOID",NULL,NULL),NULL),
+													mknode(")",NULL,NULL)),
 											mknode("\n",
 														mknode("BODY",
 																	$3,
-																	mknode(")",NUL,NUL)),NUL));} 
+																	mknode(")",NULL,NULL)),NULL));} 
 ;
 	  
 
 
 args: arg argss {$$=mknode("ARGS",
 								mknode("",$1,$2),
-								mknode(")",NUL,NUL));}
+								mknode(")",NULL,NULL));}
 				| {$$=mknode("ARGS",
 								mknode("PRINT_TOKEN",
-													mknode("NONE",NUL,NUL),
-													NUL),
-								mknode(")",NUL,NUL));}
+													mknode("NONE",NULL,NULL),
+													NULL),
+								mknode(")",NULL,NULL));}
 
 ; 
 
-argss: ';' arg argss {$$=mknode("",$2,NUL);}  
-	      | {$$=NUL;}
+argss: ';' arg argss {$$=mknode("",$2,NULL);}  
+	      | {$$=NULL;}
 ;
 
 arg: ARG ID ids ':' type  {$$=mknode("",
 										$5,
 										mknode("PRINT_TOKEN",
-															mknode($2,$3,NUL),NUL));}
+															mknode($2,$3,NULL),NULL));}
 ;
 
-ids: ','ID ids {$$=mknode("PRINT_TOKEN",mknode($2,$3,NUL),NUL);}
-              | {$$=NUL;}
+ids: ','ID ids {$$=mknode("PRINT_TOKEN",mknode($2,$3,NULL),NULL);}
+              | {$$=NULL;}
 ;
 
-type: INT     {$$=mknode("INT",NUL,NUL);}    | 
-      REAL    {$$=mknode("REAL",NUL,NUL);}   | 
-      BOOL    {$$=mknode("BOOL",NUL,NUL);}   | 
-      STRING  {$$=mknode("STRING",NUL,NUL);} | 
-      CHAR    {$$=mknode("CHAR",NUL,NUL);}   |
-      INTPTR  {$$=mknode("INTPTR",NUL,NUL);} |
-      CHARPTR {$$=mknode("CHARPTR",NUL,NUL);}| 
-      REALPTR {$$=mknode("REALPTR",NUL,NUL);}
+type: INT     {$$=mknode("INT",NULL,NULL);}    | 
+      REAL    {$$=mknode("REAL",NULL,NULL);}   | 
+      BOOL    {$$=mknode("BOOL",NULL,NULL);}   | 
+      STRING  {$$=mknode("STRING",NULL,NULL);} | 
+      CHAR    {$$=mknode("CHAR",NULL,NULL);}   |
+      INTPTR  {$$=mknode("INTPTR",NULL,NULL);} |
+      CHARPTR {$$=mknode("CHARPTR",NULL,NULL);}| 
+      REALPTR {$$=mknode("REALPTR",NULL,NULL);}
 ;    	
 
 funccall: ID '(' funcargs ')'';' 
 
 								{$$=mknode("CALL FUNC", 
 													mknode("PRINT_TOKEN",
-																		mknode($1,mknode("\n",NUL,NUL),NUL),
+																		mknode($1,mknode("\n",NULL,NULL),NULL),
 																		mknode("PARAMS",
 																						$3,
-																						mknode(")",NUL,NUL))
-																						),NUL);}
+																						mknode(")",NULL,NULL))
+																						),NULL);}
 ;
 
 funcargs:ID moreargs 
-						{$$=mknode("PRINT_TOKEN",mknode($1,NUL,NUL),$2);}
-		   			|  {$$=NUL;}
+						{$$=mknode("PRINT_TOKEN",mknode($1,NULL,NULL),$2);}
+		   			|  {$$=NULL;}
 ;
 
-moreargs: ',' ID moreargs {$$=mknode("PRINT_TOKEN",mknode($2,NUL,NUL),$3);}
-			| {$$=NUL;}
+moreargs: ',' ID moreargs {$$=mknode("PRINT_TOKEN",mknode($2,NULL,NULL),$3);}
+			| {$$=NULL;}
 ;
 
 vardic: VAR ID varasign varsdic ':' type ';' 
@@ -207,8 +206,8 @@ vardic: VAR ID varasign varsdic ':' type ';'
 																		$3,
 																		mknode($2,
 																					$4,
-																					mknode(")",NUL,NUL))),
-															NUL));}
+																					mknode(")",NULL,NULL))),
+															NULL));}
 		
 ;
 
@@ -217,43 +216,43 @@ varsdic: ',' ID varasign varsdic
 													$3,
 													mknode($2,
 																$4,
-																mknode(")",NUL,NUL)));}
-								| {$$=NUL;}
+																mknode(")",NULL,NULL)));}
+								| {$$=NULL;}
 ;
 
-varasign: '=' ex {$$=mknode("",$2,NUL);}| {$$=NUL;}
+varasign: '=' ex {$$=mknode("",$2,NULL);}| {$$=NULL;}
 ;
       
-ex: '('ex')' {$$=mknode("",$2,NUL)}| //removes one of the nuls (the ritgh one)
-	val      {$$=mknode("PRINT_TOKEN",$1,NUL);}|
-    ID       {$$=mknode("PRINT_TOKEN",mknode($1,NUL,NUL),NUL);}|
-	funccall {$$=mknode("",$1,NUL);} |
+ex: '('ex')' {$$=mknode("",$2,NULL)}| //removes one of the NULLs (the ritgh one)
+	val      {$$=mknode("PRINT_TOKEN",$1,NULL);}|
+    ID       {$$=mknode("PRINT_TOKEN",mknode($1,NULL,NULL),NULL);}|
+	funccall {$$=mknode("",$1,NULL);} |
     ex op ex 
 				{$$=mknode("OPERATION",
 										mknode("PRINT_TOKEN",
 															$2,
 															mknode("",$1,$3)),
-										mknode(")",NUL,NUL)) ;} 
+										mknode(")",NULL,NULL)) ;} 
 ;
 
-op: '+' {$$=mknode("+",NUL,NUL);}|
-    '-' {$$=mknode("-",NUL,NUL);}| 
-    '*' {$$=mknode("*",NUL,NUL);}|
-    '/' {$$=mknode("/",NUL,NUL);}
+op: '+' {$$=mknode("+",NULL,NULL);}|
+    '-' {$$=mknode("-",NULL,NULL);}| 
+    '*' {$$=mknode("*",NULL,NULL);}|
+    '/' {$$=mknode("/",NULL,NULL);}
 ;
 
-val: STR_VAL  {$$=mknode($1,NUL,NUL)}|
-     REAL_VAL {$$=mknode($1,NUL,NUL)}| 
-     CHAR_VAL {$$=mknode($1,NUL,NUL)}| 
-     DEC_VAL  {$$=mknode($1,NUL,NUL)}|
-     HEX_VAL  {$$=mknode($1,NUL,NUL)}|
-     BOOLVAL  {$$=mknode($1,NUL,NUL)}      
+val: STR_VAL  {$$=mknode($1,NULL,NULL)}|
+     REAL_VAL {$$=mknode($1,NULL,NULL)}| 
+     CHAR_VAL {$$=mknode($1,NULL,NULL)}| 
+     DEC_VAL  {$$=mknode($1,NULL,NULL)}|
+     HEX_VAL  {$$=mknode($1,NULL,NULL)}|
+     BOOLVAL  {$$=mknode($1,NULL,NULL)}      
      
 ;
 
-lop: forlop   {$$=mknode("",$1,NUL)}      |
-     whilelop {$$=mknode("",$1,NUL)}      |
-     dolop    {$$=mknode("",$1,NUL)}
+lop: forlop   {$$=mknode("",$1,NULL)}      |
+     whilelop {$$=mknode("",$1,NULL)}      |
+     dolop    {$$=mknode("",$1,NULL)}
 ;
 forlop: FOR '(' init ';' expression ';' update ')' '{'lopbody'}'
 	/* {$$=mknode("FOR",
@@ -263,16 +262,16 @@ forlop: FOR '(' init ';' expression ';' update ')' '{'lopbody'}'
 										mknode("\n",
 													mknode("EXPRESSION",
 																		$5,
-																		mknode(")",NUL,NUL)),
+																		mknode(")",NULL,NULL)),
 													mknode("\n",
 																mknode("UPDATE",
 																				$7,
-																				mknode(")",NUL,NUL)),
+																				mknode(")",NULL,NULL)),
 																mknode("\n",
-																			mknode("{}",$10,NUL),
-																			NUL))),
-								mknode(")",NUL,NUL)),
-					mknode(")",NUL,NUL)));} */
+																			mknode("{}",$10,NULL),
+																			NULL))),
+								mknode(")",NULL,NULL)),
+					mknode(")",NULL,NULL)));} */
 	{
 		$$=mknode("FOR" ,
 						mknode("INIT" ,
@@ -281,18 +280,18 @@ forlop: FOR '(' init ';' expression ';' update ')' '{'lopbody'}'
 												mknode("\n",
 															mknode("EXPRESSION" ,
 																				$5,
-																				mknode(")",NUL,NUL)),
+																				mknode(")",NULL,NULL)),
 															mknode("\n",
 																		mknode("UPDATE",
 																						$7,
-																						mknode(")",NUL,NUL)),
+																						mknode(")",NULL,NULL)),
 																		mknode("\n",
 																					mknode("{}",
 																								$10,
-																								NUL),
-																					NUL)))),
-										mknode(")" , NUL,NUL)),
-						mknode(")",NUL,NUL));
+																								NULL),
+																					NULL)))),
+										mknode(")" , NULL,NULL)),
+						mknode(")",NULL,NULL));
 						
 									
 	}
@@ -301,11 +300,11 @@ forlop: FOR '(' init ';' expression ';' update ')' '{'lopbody'}'
 init: ID '=' intval {$$ = mknode("=",
 									mknode("",
 												$3,
-												mknode(")",NUL,NUL)),
-									mknode($1,NUL,NUL));}
+												mknode(")",NULL,NULL)),
+									mknode($1,NULL,NULL));}
 ;
-intval: DEC_VAL {$$=mknode($1,NUL,NUL);} | 
-		ID		 {$$=mknode($1,NUL,NUL);}
+intval: DEC_VAL {$$=mknode($1,NULL,NULL);} | 
+		ID		 {$$=mknode($1,NULL,NULL);}
 ;
 expression: '(' expression ')' lopexp     {$$=mknode("(",$2,$4);} |
             notexp lopexp    			{$$=mknode(" ",$1,$2);} |
@@ -316,18 +315,18 @@ expression: '(' expression ')' lopexp     {$$=mknode("(",$2,$4);} |
 																						$1,
 																						mknode("",
 																									$3,
-																									NUL))),
-																mknode(")",NUL,NUL));}  
+																									NULL))),
+																mknode(")",NULL,NULL));}  
 ;
 
-not: NOT {$$ = mknode($1,NUL,NUL)} | {$$=NUL;}
+not: NOT {$$ = mknode($1,NULL,NULL)} | {$$=NULL;}
 ;
 
-notexp: NOT splitnot {$$=mknode("PRINT_TOKEN",mknode($1,$2,NUL),NUL);}
+notexp: NOT splitnot {$$=mknode("PRINT_TOKEN",mknode($1,$2,NULL),NULL);}
 ;
 
-splitnot: ex                    {$$=mknode("",$1,NUL);}  | 
-	 	  '(' expression ')' 	{$$=mknode("",$2,NUL);} 
+splitnot: ex                    {$$=mknode("",$1,NULL);}  | 
+	 	  '(' expression ')' 	{$$=mknode("",$2,NULL);} 
 ;
 
 
@@ -336,36 +335,37 @@ lopexp: oper expression lopexp
 														mknode("",
 																	$2,
 																	mknode("",$1,$3)),
-														mknode(")",NUL,NUL)) ;}
-							|   {$$=NUL;}
+														mknode(")",NULL,NULL)) ;}
+							|   {$$=NULL;}
 ;
 
-oper: EQ    {$$=mknode($1,NUL,NUL);}|
-      GTE   {$$=mknode($1,NUL,NUL);}|
-      LTE   {$$=mknode($1,NUL,NUL);}|
-      NOTEQ {$$=mknode($1,NUL,NUL);}|
-      /* '>'   {$$=mknode($1,NUL,NUL);}|
-      '<'   {$$=mknode($1,NUL,NUL);}| */
-	  AND   {$$=mknode($1,NUL,NUL);}| 
-      OR    {$$=mknode($1,NUL,NUL);}
+oper: EQ    {$$=mknode($1,NULL,NULL);}|
+      GTE   {$$=mknode($1,NULL,NULL);}|
+      LTE   {$$=mknode($1,NULL,NULL);}|
+      NOTEQ {$$=mknode($1,NULL,NULL);}|
+      GT  {$$=mknode($1,NULL,NULL);}|
+      LT   {$$=mknode($1,NULL,NULL);}|
+	  AND   {$$=mknode($1,NULL,NULL);}| 
+      OR    {$$=mknode($1,NULL,NULL);}|
+	  ASS    {$$=mknode($1,NULL,NULL);}
 ;
 
 
 
 update:ID updatechage {$$=mknode("UPDATE",
-										mknode("PRINT_TOKEN",$2,NUL),
-										mknode(")",NUL,NUL));}
+										mknode("PRINT_TOKEN",$2,NULL),
+										mknode(")",NULL,NULL));}
 ;
 
-updatechage: '+''+'          {$$=mknode("+1",NUL,NUL);}		         |
-	          '-''-'         {$$=mknode("-1",NUL,NUL);}		         |
-	          '*''=' DEC_VAL {$$=mknode("*",$3,NUL);} 					 |
-	          '+''=' DEC_VAL {$$=mknode("+",$3,NUL);} 					 |
-	          '-''=' DEC_VAL {$$=mknode("-",$3,NUL);} 
+updatechage: '+''+'          {$$=mknode("+1",NULL,NULL);}		         |
+	          '-''-'         {$$=mknode("-1",NULL,NULL);}		         |
+	          '*''=' DEC_VAL {$$=mknode("*",$3,NULL);} 					 |
+	          '+''=' DEC_VAL {$$=mknode("+",$3,NULL);} 					 |
+	          '-''=' DEC_VAL {$$=mknode("-",$3,NULL);} 
 ;
 
-lopbody: body    {$$=mknode("",$1,NUL);}|
-	 bodyret {$$=mknode("",$1,NUL);}
+lopbody: body    {$$=mknode("",$1,NULL);}|
+	 bodyret {$$=mknode("",$1,NULL);}
 ;
 
 whilelop: WHILE '(' expression ')' '{'lopbody'}'
@@ -375,9 +375,9 @@ whilelop: WHILE '(' expression ')' '{'lopbody'}'
 																$3,
 																mknode("{}",
 																			$6,
-																			mknode(")",NUL,NUL))),
-													mknode(")",NUL,NUL)),
-								mknode(")",NUL,NUL));}
+																			mknode(")",NULL,NULL))),
+													mknode(")",NULL,NULL)),
+								mknode(")",NULL,NULL));}
 ;
 
 dolop: DO '{' lopbody '}' WHILE '(' expression ')'
@@ -388,10 +388,10 @@ dolop: DO '{' lopbody '}' WHILE '(' expression ')'
 										mknode(")",
 													mknode("EXPRESSION",
 																			$7,
-																			mknode(")",NUL,NUL)),
-													NUL)),
-								NUL),
-					mknode(")",NUL,NUL));}
+																			mknode(")",NULL,NULL)),
+													NULL)),
+								NULL),
+					mknode(")",NULL,NULL));}
 ;
 
 ifstate: IF '(' expression ')' '{' lopbody '}' elstate 
@@ -401,19 +401,19 @@ ifstate: IF '(' expression ')' '{' lopbody '}' elstate
 											mknode("{}",
 														mknode("",
 																$6,
-																mknode(")",NUL,NUL)),
+																mknode(")",NULL,NULL)),
 														$8)),
-						mknode(")",NUL,NUL));}
+						mknode(")",NULL,NULL));}
 ;
 
 elstate: '{'lopbody'}'  {$$=mknode("{}",
-										mknode("",$2,NUL),
-										mknode(")",NUL,NUL));}
-			|{$$=NUL;} 
+										mknode("",$2,NULL),
+										mknode(")",NULL,NULL));}
+			|{$$=NULL;} 
 ;     
       
 
-body: cmt bodysplit {$$=mknode("",$2,NUL);}
+body: cmt bodysplit {$$=mknode("",$2,NULL);}
 
 bodysplit: process      body  {$$=mknode("",$1,$2);}|
            ifstate      body  {$$=mknode("",$1,$2);}|
@@ -422,23 +422,23 @@ bodysplit: process      body  {$$=mknode("",$1,$2);}|
       	   funccall     body  {$$=mknode("",$1,$2);}|
       	   '{' body '}' body  {$$=mknode("{}",
       	   									mknode("",$2,$4),
-											mknode(")",NUL,NUL));}
-							| {$$=NUL;}
+											mknode(")",NULL,NULL));}
+							| {$$=NULL;}
 ;
 
 bodyret:body RETURN retval {$$=mknode("",
 										$1,
 										mknode("RETURN_VAL",
 															$3,
-															mknode(")",NUL,NUL)));}
+															mknode(")",NULL,NULL)));}
 ;
 
-retval: ID         {$$=mknode("PRINT_TOKEN",mknode($1,NUL,NUL),NUL);} |
-        funccall   {$$=mknode("",$1,NUL);} |
-        val        {$$=mknode("",$1,NUL);} |
+retval: ID         {$$=mknode("PRINT_TOKEN",mknode($1,NULL,NULL),NULL);} |
+        funccall   {$$=mknode("",$1,NULL);} |
+        val        {$$=mknode("",$1,NULL);} |
         expression {$$=mknode("EXPRESSION",
 											$1,
-											mknode(")",NUL,NUL));}
+											mknode(")",NULL,NULL));}
 ;
  
 
@@ -474,14 +474,14 @@ void printSpace(int num){
 	printf("%s",space*num); */
 }
 /* void printNodesTree(node* tree){
-	if(tree != NUL){
+	if(tree != NULL){
 
 	}
 } */
 void printTree(node* tree)
 {	
 	
-	if (tree != NUL){
+	if (tree != NULL){
 		if((strcmp(tree->token,"CODE") == 0 )        ||
 		(strcmp(tree->token, "FUNC") == 0)        ||
 		(strcmp(tree->token, "BODY") == 0)        ||
@@ -508,7 +508,7 @@ void printTree(node* tree)
 			}
 			else if (strcmp(tree->token, "=") == 0){
 
-				if(tree->left != NUL){
+				if(tree->left != NULL){
 					printf("(%s %s\n",tree->token,tree->right->token);
 				}
 				else{
